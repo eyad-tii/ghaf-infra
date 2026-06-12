@@ -377,6 +377,10 @@ in
         isNormalUser = true;
         openssh.authorizedKeys.keys = [ machines.uae-testagent2-prod.publicKey ];
       };
+      g4h-testagent-dev = {
+        isNormalUser = true;
+        openssh.authorizedKeys.keys = [ machines.g4h-testagent-dev.publicKey ];
+      };
     };
   };
 }
