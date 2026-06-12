@@ -59,6 +59,8 @@
 
   services.logind.lidSwitch = "ignore";
 
+  services.tailscale.enable = true;
+
   services.udev.extraRules = ''
     # Orin NX
     SUBSYSTEM=="tty", ENV{ID_PATH}=="pci-0000:00:14.0-usb-0:1.3.1:1.0", ENV{ID_VENDOR_ID}=="067b", ENV{ID_MODEL_ID}=="2303", SYMLINK+="ttyORINNX1", MODE="0666", GROUP="dialout"
