@@ -14,7 +14,9 @@ properties([
     string(name: 'GITREF', defaultValue: 'main', description: 'Ghaf git reference (Commit/Branch/Tag)'),
     string(name: 'TESTSET', defaultValue: null, description: 'By default tests are skipped. To run hw-tests, define the target testset here; e.g.: _relayboot_, _relayboot_bat_, _relayboot_pre-merge_, etc.)'),
     booleanParam(name: 'nvidia_jetson_orin_agx_debug_from_x86_64', defaultValue: false, description: 'Build target packages.x86_64-linux.nvidia-jetson-orin-agx-debug-from-x86_64'),
+    booleanParam(name: 'nvidia_jetson_orin_nx_debug_from_x86_64', defaultValue: false, description: 'Build target packages.x86_64-linux.nvidia-jetson-orin-nx-debug-from-x86_64'),
     booleanParam(name: 'nvidia_jetson_orin_agx_debug', defaultValue: false, description: 'Build target packages.aarch64-linux.nvidia-jetson-orin-agx-debug'),
+    booleanParam(name: 'nvidia_jetson_orin_nx_debug', defaultValue: false, description: 'Build target packages.aarch64-linux.nvidia-jetson-orin-nx-debug'),
  ])
 ])
 pipeline {
@@ -54,9 +56,17 @@ pipeline {
               TARGETS.push(
                 [ target: "packages.x86_64-linux.nvidia-jetson-orin-agx-debug-from-x86_64", uefisign: params.UEFISIGN, testset: params.TESTSET ])
             }
+            if (params.nvidia_jetson_orin_nx_debug_from_x86_64) {
+              TARGETS.push(
+                [ target: "packages.x86_64-linux.nvidia-jetson-orin-nx-debug-from-x86_64", uefisign: params.UEFISIGN, testset: params.TESTSET ])
+            }
             if (params.nvidia_jetson_orin_agx_debug) {
               TARGETS.push(
                 [ target: "packages.aarch64-linux.nvidia-jetson-orin-agx-debug", uefisign: params.UEFISIGN, testset: params.TESTSET ])
+            }
+            if (params.nvidia_jetson_orin_nx_debug) {
+              TARGETS.push(
+                [ target: "packages.aarch64-linux.nvidia-jetson-orin-nx-debug", uefisign: params.UEFISIGN, testset: params.TESTSET ])
             }
 
             PIPELINE = pipelineExecution.create_pipeline(TARGETS)
