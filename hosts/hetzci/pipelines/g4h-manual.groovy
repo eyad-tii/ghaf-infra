@@ -17,6 +17,7 @@ properties([
     booleanParam(name: 'nvidia_jetson_orin_nx_debug_from_x86_64', defaultValue: false, description: 'Build target packages.x86_64-linux.nvidia-jetson-orin-nx-debug-from-x86_64'),
     booleanParam(name: 'nvidia_jetson_orin_agx_debug', defaultValue: false, description: 'Build target packages.aarch64-linux.nvidia-jetson-orin-agx-debug'),
     booleanParam(name: 'nvidia_jetson_orin_nx_debug', defaultValue: false, description: 'Build target packages.aarch64-linux.nvidia-jetson-orin-nx-debug'),
+    booleanParam(name: 'delivery_orinnx_lab', defaultValue: false, description: 'Build target packages.aarch64-linux.delivery-orinnx-lab (set REPO_URL to the ghaf-humanoids repo)'),
  ])
 ])
 pipeline {
@@ -67,6 +68,10 @@ pipeline {
             if (params.nvidia_jetson_orin_nx_debug) {
               TARGETS.push(
                 [ target: "packages.aarch64-linux.nvidia-jetson-orin-nx-debug", uefisign: params.UEFISIGN, testset: params.TESTSET ])
+            }
+            if (params.delivery_orinnx_lab) {
+              TARGETS.push(
+                [ target: "packages.aarch64-linux.delivery-orinnx-lab", uefisign: params.UEFISIGN, testset: params.TESTSET ])
             }
 
             PIPELINE = pipelineExecution.create_pipeline(TARGETS)
