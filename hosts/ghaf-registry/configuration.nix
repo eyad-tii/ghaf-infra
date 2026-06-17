@@ -77,6 +77,8 @@ let
       auth = {
         htpasswd.path = config.sops.secrets.zot-htpasswd.path;
 
+        apikey = true;
+
         openid.providers.oidc = {
           name = "Vedenemo Auth";
           issuer = "https://auth.vedenemo.dev";
@@ -110,7 +112,12 @@ let
             anonymousPolicy = [ "read" ];
           };
           "**" = {
-            defaultPolicy = [ "read" ];
+            defaultPolicy = [
+              "read"
+              "create"
+              "update"
+              "delete"
+            ];
             anonymousPolicy = [ "read" ];
           };
         };
@@ -170,6 +177,7 @@ in
     enableACME = true;
     forceSSL = true;
     default = true;
+    http2 = false;
 
     locations."/" = {
       proxyPass = "http://127.0.0.1:${toString zotPort}";
@@ -193,9 +201,6 @@ in
       '';
     };
   };
-
-  environment.systemPackages = [
-  ];
 
   users.groups.zot = { };
   users.users.zot = {
