@@ -2,7 +2,7 @@
 
 @Library('ghafInfra') _
 
-def DEFAULT_REPO_URL = 'https://github.com/tiiuae/ghaf/'
+def DEFAULT_REPO_URL = 'https://github.com/tiiuae/ghaf-humanoids/'
 def PIPELINE = [:]
 
 properties([
@@ -12,12 +12,13 @@ properties([
     booleanParam(name: 'SECUREBOOT', defaultValue: false, description: 'Run tests also on secureboot enabled hardware, if available'),
     string(name: 'REPO_URL', defaultValue: DEFAULT_REPO_URL, description: 'Git repository URL'),
     string(name: 'GITREF', defaultValue: 'main', description: 'Ghaf git reference (Commit/Branch/Tag)'),
+    string(name: 'CREDENTIALS_ID', defaultValue: 'github-ghaf-humanoids', description: 'Jenkins credentialsId for cloning a private ghaf-humanoids'),
     string(name: 'TESTSET', defaultValue: null, description: 'By default tests are skipped. To run hw-tests, define the target testset here; e.g.: _relayboot_, _relayboot_bat_, _relayboot_pre-merge_, etc.)'),
     booleanParam(name: 'nvidia_jetson_orin_agx_debug_from_x86_64', defaultValue: false, description: 'Build target packages.x86_64-linux.nvidia-jetson-orin-agx-debug-from-x86_64'),
     booleanParam(name: 'nvidia_jetson_orin_nx_debug_from_x86_64', defaultValue: false, description: 'Build target packages.x86_64-linux.nvidia-jetson-orin-nx-debug-from-x86_64'),
     booleanParam(name: 'nvidia_jetson_orin_agx_debug', defaultValue: false, description: 'Build target packages.aarch64-linux.nvidia-jetson-orin-agx-debug'),
     booleanParam(name: 'nvidia_jetson_orin_nx_debug', defaultValue: false, description: 'Build target packages.aarch64-linux.nvidia-jetson-orin-nx-debug'),
-    booleanParam(name: 'delivery_orinnx_lab', defaultValue: false, description: 'Build target packages.aarch64-linux.delivery-orinnx-lab (set REPO_URL to the ghaf-humanoids repo)'),
+    booleanParam(name: 'delivery_orinnx_lab', defaultValue: true, description: 'Build target packages.aarch64-linux.delivery-orinnx-lab'),
  ])
 ])
 pipeline {
@@ -42,7 +43,19 @@ pipeline {
       steps {
         dir(artifactSupport.controller_workdir()) {
           script {
-            checkoutUtils.checkout_remote_ref(params.REPO_URL, params.GITREF)
+            if (params.CREDENTIALS_ID?.trim()) {
+              deleteDir()
+              checkout scmGit(
+                branches: [[name: params.GITREF]],
+                userRemoteConfigs: [[
+                  url: params.REPO_URL,
+                  credentialsId: params.CREDENTIALS_ID,
+                ]],
+                extensions: [[$class: 'CloneOption', noTags: true, timeout: 30]],
+              )
+            } else {
+              checkoutUtils.checkout_remote_ref(params.REPO_URL, params.GITREF)
+            }
           }
         }
       }

@@ -28,7 +28,7 @@ def pipelineParameters(boolean useFlakePinnedDefault = false) {
     ),
     string(name: 'CI_TEST_REPO_URL', defaultValue: 'https://github.com/tiiuae/ci-test-automation.git', description: 'Select ci-test-automation repository.'),
     string(name: 'CI_TEST_REPO_BRANCH', defaultValue: 'main', description: 'Select ci-test-automation branch to checkout.'),
-    string(name: 'TEST_TAGS', defaultValue: '', description: 'Target test tags, e.g.: lenovo-x1ANDapps, SP-T140, SP-T45ORSP-T60, etc.'),
+    string(name: 'TEST_TAGS', defaultValue: 'SP-T54ORSP-T55', description: 'Target test tags, e.g.: lenovo-x1ANDapps, SP-T140, SP-T45ORSP-T60, etc.'),
     string(
       name: 'OCI_IMAGE_REF',
       defaultValue: '',
@@ -69,7 +69,7 @@ def pipelineParameters(boolean useFlakePinnedDefault = false) {
         script: [
           classpath: [],
           sandbox: true,
-          script: "return ['orin-agx','orin-agx-64','orin-nx','lenovo-x1','dell-7330','darter-pro', 'x1-sec-boot']"
+          script: "return ['orin-nx:selected','orin-agx','orin-agx-64','lenovo-x1','dell-7330','darter-pro', 'x1-sec-boot']"
         ]
       ]
     ],
@@ -92,7 +92,7 @@ def pipelineParameters(boolean useFlakePinnedDefault = false) {
         script: [
           classpath: [],
           sandbox: true,
-          script: "return ['dev','prod','release']"
+          script: "return ['dev:selected','prod','release']"
         ]
       ]
     ],
@@ -228,6 +228,12 @@ pipeline {
       agent { label 'built-in' }
       steps {
         script {
+          if (params.OCI_IMAGE_REF?.trim()) {
+            def regHost = params.OCI_IMAGE_REF.trim().tokenize('/')[0]
+            withCredentials([string(credentialsId: 'oci_registry_password', variable: 'OCI_PASSWORD')]) {
+              sh "set +x; echo \"\$OCI_PASSWORD\" | oras login '${regHost}' -u jenkins --password-stdin"
+            }
+          }
           env.TEST_AGENT_LABEL = init()
         }
       }
@@ -268,6 +274,12 @@ pipeline {
             script {
               env.TEST_CONFIG_DIR = 'Robot-Framework/config'
               env.FLASHED = 'false'
+              if (params.OCI_IMAGE_REF?.trim()) {
+                def regHost = params.OCI_IMAGE_REF.trim().tokenize('/')[0]
+                withCredentials([string(credentialsId: 'oci_registry_password', variable: 'OCI_PASSWORD')]) {
+                  sh "set +x; echo \"\$OCI_PASSWORD\" | oras login '${regHost}' -u jenkins --password-stdin"
+                }
+              }
               sh """
                 mkdir -p ${TEST_CONFIG_DIR}
                 rm -f ${TEST_CONFIG_DIR}/*.json
